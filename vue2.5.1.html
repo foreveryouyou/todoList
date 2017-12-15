@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Todo List</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        th, td {
+            text-align: center;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="vm">
+    <div class="page-header"></div>
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading">
+            <h3>
+                TodoList
+                <button class="btn btn-success pull-right" @click="addOne()">
+                    <i class="glyphicon glyphicon-plus"></i> 新增
+                </button>
+            </h3>
+        </div>
+        <div class="panel-body">
+
+        </div>
+        <!-- Table -->
+        <table class="table table-striped table-hover" v-cloak>
+            <tr>
+                <th width="50">#</th>
+                <th>待办项</th>
+                <th>操作</th>
+            </tr>
+            <tr v-for="(item, index) in todoList">
+                <td>{{index + 1}}</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr v-show="todoList.length === 0">
+                <td colspan="3">暂无待办项</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/vue/2.5.1/vue.min.js"></script>
+<script>
+    new Vue({
+        el: '#vm',
+        data: {
+            todoList: [],
+            doneList: []
+        },
+        created: function () {
+
+        },
+        methods: {
+            addOne: function () {
+                var now = new Date().getTime();
+                this.todoList.push(this.genOne());
+            },
+            genOne: function () {
+                var now = new Date().getTime();
+                return {
+                    id: 't_' + now,
+                    content: '',
+                    status: 0, // 状态: 0-默认, 1-已完成, 2-已删除
+                    createTime: now,
+                    updateTime: now
+                };
+            }
+        }
+    });
+</script>
+</body>
+</html>
