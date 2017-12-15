@@ -39,12 +39,29 @@
             <tr>
                 <th width="50">#</th>
                 <th>待办项</th>
-                <th>操作</th>
+                <th width="200">操作</th>
             </tr>
             <tr v-for="(item, index) in todoList">
                 <td>{{index + 1}}</td>
-                <td>{{item.content}}</td>
-                <td></td>
+                <td>
+                    <template v-show="item.status === 1">
+                        <del>{{item.content}}</del>
+                    </template>
+                    <template v-show="item.status === 0">
+                        {{item.content}}
+                    </template>
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-xs" @click="editOne(item)">
+                        <i class="glyphicon glyphicon-pencil"></i> 编辑
+                    </button>
+                    <button class="btn btn-success btn-xs" @click="item.status = 1">
+                        <i class="glyphicon glyphicon-ok"></i> 完成
+                    </button>
+                    <button class="btn btn-danger btn-xs" @click="editOne(item)">
+                        <i class="glyphicon glyphicon-trash"></i> 删除
+                    </button>
+                </td>
             </tr>
             <tr v-show="todoList.length === 0">
                 <td colspan="3" class="text-info">暂无待办项</td>
@@ -117,10 +134,12 @@
         data: {
             todoList: [],
             doneList: [],
-            itemTemp: {}
+            itemTemp: {},
+            lsKeyTodoList: 'yyTodoList_todoList',
+            lsKeyDoneList: 'yyTodoList_doneList'
         },
         created: function () {
-            this.itemTemp;
+            this.restoreData();
         },
         methods: {
             addOne: function () {
@@ -129,6 +148,19 @@
             },
             addOneDo: function () {
                 this.todoList.push(this.itemTemp);
+                this.saveData();
+            },
+            // 从localStorage恢复数据
+            restoreData: function () {
+                var todoList = JSON.parse(localStorage.getItem(this.lsKeyTodoList));
+                var doneList = JSON.parse(localStorage.getItem(this.lsKeyDoneList));
+                this.todoList = todoList || [];
+                this.doneList = doneList || [];
+            },
+            // 保存到localStorage
+            saveData: function () {
+                localStorage.setItem(this.lsKeyTodoList, JSON.stringify(this.todoList));
+                localStorage.setItem(this.lsKeyDoneList, JSON.stringify(this.doneList));
             },
             genOne: function () {
                 var now = new Date().getTime();
