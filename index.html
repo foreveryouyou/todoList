@@ -17,6 +17,10 @@
             margin-top: 10px;
         }
 
+        .table {
+            margin-bottom: 0;
+        }
+
         th, td {
             text-align: center;
         }
@@ -32,66 +36,123 @@
         <div class="panel-heading">
             <h3>
                 TodoList
-                <small> 共{{todoList.length}}个待办项</small>
+                <small v-cloak> 共 {{todoList.length}} 个待办项 (
+                    待办 <span class="text-primary">{{unfinishedList.length}}</span> 个,
+                    完成 <span class="text-success">{{finishedList.length}}</span> 个,
+                    删除 <span class="text-danger">{{deletedList.length}}</span> 个 )
+                </small>
                 <button class="btn btn-success pull-right" @click="addOne()">
                     <i class="glyphicon glyphicon-plus"></i> 新增
                 </button>
             </h3>
         </div>
-        <div class="panel-body">
+        <!--<div class="panel-body"></div>-->
+        <ul class="nav nav-tabs nav-justified nav-pills">
+            <li role="presentation"><a href="#listDone">已完成</a></li>
+            <li role="presentation" class="active"><a href="#listTodo">未完成</a></li>
+            <li role="presentation"><a href="#listDeleted">已删除</a></li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="listTodo">
+                <table class="table table-striped table-hover" v-cloak>
+                    <tr>
+                        <th width="50">#</th>
+                        <th>待办项</th>
+                        <th width="160">时间</th>
+                        <th width="220">操作</th>
+                    </tr>
+                    <tr v-for="(item, index) in unfinishedList">
+                        <td>{{index + 1}}</td>
+                        <td>
+                            <a href="javascript:void(0);" @click="showOne(item);">{{item.content}}</a>
+                        </td>
+                        <td>
+                            {{new Date(item.createTime).format('YYYY-MM-dd hh:mm:ss')}}
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-xs" @click="editOne(item)">
+                                <i class="glyphicon glyphicon-pencil"></i> 编辑
+                            </button>
+                            <button class="btn btn-success btn-xs" @click="finishOne(item)">
+                                <i class="glyphicon glyphicon-ok"></i> 设为完成
+                            </button>
+                            <button class="btn btn-danger btn-xs" @click="delOne(item)">
+                                <i class="glyphicon glyphicon-trash"></i> 删除
+                            </button>
+                        </td>
+                    </tr>
+                    <tr v-show="unfinishedList.length === 0">
+                        <td colspan="4" class="text-info">暂无未完成的待办项</td>
+                    </tr>
+                </table>
+            </div>
 
+            <div role="tabpanel" class="tab-pane" id="listDone">
+                <table class="table table-striped table-hover" v-cloak>
+                    <tr>
+                        <th width="50">#</th>
+                        <th>待办项</th>
+                        <th width="160">时间</th>
+                        <th width="220">操作</th>
+                    </tr>
+                    <tr v-for="(item, index) in finishedList">
+                        <td>{{index + 1}}</td>
+                        <td>
+                            <a href="javascript:void(0);" @click="showOne(item);">{{item.content}}</a>
+                        </td>
+                        <td>
+                            {{new Date(item.createTime).format('YYYY-MM-dd hh:mm:ss')}}
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-xs" @click="editOne(item)">
+                                <i class="glyphicon glyphicon-pencil"></i> 编辑
+                            </button>
+                            <button class="btn btn-info btn-xs" @click="finishOne(item)">
+                                <i class="glyphicon glyphicon-ok"></i> 设为待办
+                            </button>
+                            <button class="btn btn-danger btn-xs" @click="delOne(item)">
+                                <i class="glyphicon glyphicon-trash"></i> 删除
+                            </button>
+                        </td>
+                    </tr>
+                    <tr v-show="finishedList.length === 0">
+                        <td colspan="4" class="text-info">暂无已完成的待办项</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div role="tabpanel" class="tab-pane" id="listDeleted">
+                <table class="table table-striped table-hover" v-cloak>
+                    <tr>
+                        <th width="50">#</th>
+                        <th>待办项</th>
+                        <th width="160">时间</th>
+                        <th width="160">操作</th>
+                    </tr>
+                    <tr v-for="(item, index) in deletedList">
+                        <td>{{index + 1}}</td>
+                        <td>
+                            {{item.content}}
+                        </td>
+                        <td>
+                            {{new Date(item.createTime).format('YYYY-MM-dd hh:mm:ss')}}
+                        </td>
+                        <td>
+                            <button class="btn btn-success btn-xs" @click="delOne(item)">
+                                <i class="glyphicon glyphicon-arrow-left"></i> 恢复
+                            </button>
+                            <button class="btn btn-danger btn-xs" @click="realDelOne(item)">
+                                <i class="glyphicon glyphicon-trash"></i> 彻底删除
+                            </button>
+                        </td>
+                    </tr>
+                    <tr v-show="deletedList.length === 0">
+                        <td colspan="4" class="text-info">暂无已删除的待办项</td>
+                    </tr>
+                </table>
+            </div>
         </div>
-        <table class="table table-striped table-hover" v-cloak>
-            <tr>
-                <th width="50">#</th>
-                <th>待办项</th>
-                <th width="160">时间</th>
-                <th width="220">操作</th>
-            </tr>
-            <tr v-for="(item, index) in todoList">
-                <td>{{index + 1}}</td>
-                <td>
-                    {{item.content}}
-                </td>
-                <td>
-                    {{new Date(item.createTime).format('YYYY-MM-dd hh:mm:ss')}}
-                </td>
-                <td>
-                    <button class="btn btn-primary btn-xs" @click="editOne(item)">
-                        <i class="glyphicon glyphicon-pencil"></i> 编辑
-                    </button>
-                    <button class="btn btn-success btn-xs" @click="finishOne(item)">
-                        <i class="glyphicon glyphicon-ok"></i> 设为完成
-                    </button>
-                    <button class="btn btn-danger btn-xs" @click="delOne(index,1)">
-                        <i class="glyphicon glyphicon-trash"></i> 删除
-                    </button>
-                </td>
-            </tr>
-            <tr v-for="(item, index) in doneList">
-                <td>{{index + 1}}</td>
-                <td>
-                    <del>{{item.content}}</del>
-                </td>
-                <td>
-                    {{new Date(item.createTime).format('YYYY-MM-dd hh:mm:ss')}}
-                </td>
-                <td>
-                    <button class="btn btn-primary btn-xs" @click="editOne(item)">
-                        <i class="glyphicon glyphicon-pencil"></i> 编辑
-                    </button>
-                    <button class="btn btn-info btn-xs" @click="unFinishOne(item)">
-                        <i class="glyphicon glyphicon-ok"></i> 设为待办
-                    </button>
-                    <button class="btn btn-danger btn-xs" @click="delOne(index,2)">
-                        <i class="glyphicon glyphicon-trash"></i> 删除
-                    </button>
-                </td>
-            </tr>
-            <tr v-show="todoList.length === 0">
-                <td colspan="4" class="text-info">暂无未完成的待办项</td>
-            </tr>
-        </table>
+
     </div>
 
     <!-- Modal -->
@@ -108,7 +169,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">待办事项:</label>
                             <div class="col-sm-10">
-                                <input class="form-control" v-model="itemTemp.content" placeholder="待办事项">
+                                <input class="form-control" v-model="itemTemp.content" ref="todoContent" placeholder="待办事项">
                             </div>
                         </div>
                         <div class="form-group">
@@ -117,11 +178,23 @@
                                 <textarea class="form-control" v-model="itemTemp.desc" rows="3" placeholder="待办说明"></textarea>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">创建时间:</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" :value="new Date(itemTemp.createTime).format('YYYY-MM-dd hh:mm:ss')" title="" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">修改时间:</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" :value="new Date(itemTemp.updateTime).format('YYYY-MM-dd hh:mm:ss')" title="" disabled>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <div class="text-center">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal" @click="addOneDo()">确定
+                        <button type="button" class="btn btn-primary" @click="saveOne()">确定
                         </button>
                     </div>
                 </div>
@@ -129,26 +202,6 @@
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="myAlert" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">提示</h4>
-                </div>
-                <div class="modal-body text-center">
-
-                </div>
-                <div class="modal-footer">
-                    <div class="text-center">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 <script src="//cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 <script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -182,85 +235,131 @@
         el: '#vm',
         data: {
             todoList: [],
-            doneList: [],
-            deletedList: [],
             itemTemp: {},
+            isEdit: false, // 是否是编辑
             lsKeyTodoList: 'yyTodoList_todoList',
-            lsKeyDoneList: 'yyTodoList_doneList',
             lsKeyDeletedList: 'yyTodoList_deletedList'
         },
         created: function () {
             this.restoreData();
+            Vue.nextTick(function () {
+                $('.nav-tabs a').click(function (e) {
+                    e.preventDefault();
+                    $(this).tab('show');
+                })
+            })
+        },
+        computed: {
+            // 已完成列表
+            finishedList: function () {
+                return this.todoList.filter(function (todoItem) {
+                    return !todoItem.deleted && todoItem.finished;
+                });
+            },
+            // 未完成列表
+            unfinishedList: function () {
+                return this.todoList.filter(function (todoItem) {
+                    return !todoItem.deleted && !todoItem.finished;
+                });
+            },
+            // 已删除列表
+            deletedList: function () {
+                return this.todoList.filter(function (todoItem) {
+                    return todoItem.deleted;
+                });
+            }
         },
         methods: {
             addOne: function () {
+                this.isEdit = false;
                 this.itemTemp = this.genOne();
                 $('#editOne').modal('show');
             },
-            addOneDo: function () {
-                this.todoList.push(JSON.parse(JSON.stringify(this.itemTemp)));
+            saveOne: function () {
+                this.itemTemp.content = $.trim(this.itemTemp.content);
+                if (this.itemTemp.content === '') {
+                    layer.msg('请填写待办事项内容', {offset: '50px'});
+                    this.$refs.todoContent.focus();
+                    return;
+                }
+                var now = new Date().getTime();
+                this.itemTemp.updateTime = now;
+                if (!this.isEdit) {
+                    this.itemTemp.createTime = now;
+                    this.todoList.push(JSON.parse(JSON.stringify(this.itemTemp)));
+                } else {
+                    var vm = this;
+                    this.todoList.map(function (item, index) {
+                        if (item.id === vm.itemTemp.id) {
+                            Vue.set(vm.todoList, index, vm.itemTemp);
+                        }
+                    });
+                }
+                $('#editOne').modal('hide');
                 this.saveData();
             },
             editOne: function (todoItem) {
-                layer.msg('尚未实现');
+                this.isEdit = true;
+                this.itemTemp = JSON.parse(JSON.stringify(todoItem));
+                $('#editOne').modal('show');
             },
-            finishOne: function (todoItem, index) {
-                todoItem.status = 1;
-                this.doneList.push(this.todoList.splice(index, 1)[0]);
+            finishOne: function (todoItem) {
+                todoItem.finished = !todoItem.finished;
                 this.saveData();
             },
-            unFinishOne: function (todoItem, index) {
-                todoItem.status = 0;
-                this.todoList.push(this.doneList.splice(index, 1)[0]);
-                this.saveData();
-            },
-            delOne: function (index, flg) {
+            delOne: function (todoItem) {
                 var vm = this;
-                layer.confirm('确定删除?', function (layerIndex) {
-                    var delItem;
-                    if (flg === 1) {
-                        delItem = vm.todoList[index];
-                        Vue.delete(vm.todoList, index);
-                    } else {
-                        delItem = vm.doneList[index];
-                        Vue.delete(vm.doneList, index);
-                    }
-                    delItem.status = 2;
-                    vm.deletedList.push(delItem);
+                var title = todoItem.deleted ? '恢复该条记录?' : '确定删除该记录?';
+                layer.confirm(title, function (layerIndex) {
+                    todoItem.deleted = !todoItem.deleted;
                     vm.saveData();
                     layer.close(layerIndex);
+                });
+            },
+            realDelOne: function (todoItem) {
+                var vm = this;
+                layer.confirm('确定彻底删除该记录, 删除后不可恢复?', function (layerIndex) {
+                    var _index = 0;
+                    vm.todoList.map(function (item, index) {
+                        if (item.id === todoItem.id) {
+                            _index = index;
+                        }
+                    });
+                    vm.todoList.splice(_index, 1);
+                    vm.saveData();
+                    layer.close(layerIndex);
+                });
+            },
+            showOne: function (todoItem) {
+                layer.alert('待办: <pre>' + todoItem.content +
+                    '</pre>说明: <pre>' + todoItem.desc +
+                    '</pre>创建: <pre>' + new Date(todoItem.createTime).format('YYYY-MM-dd hh:mm:ss') +
+                    '</pre>更新: <pre>' + new Date(todoItem.updateTime).format('YYYY-MM-dd hh:mm:ss') + '</pre>', {
+                    area: ['500px']
                 });
             },
             // 从localStorage恢复数据
             restoreData: function () {
                 var todoList = JSON.parse(localStorage.getItem(this.lsKeyTodoList));
-                var doneList = JSON.parse(localStorage.getItem(this.lsKeyDoneList));
-                var deletedList = JSON.parse(localStorage.getItem(this.lsKeyDeletedList));
                 this.todoList = todoList || [];
-                this.doneList = doneList || [];
-                this.deletedList = deletedList || [];
             },
             // 保存到localStorage
             saveData: function () {
                 this.todoList.sort(function (a, b) {
                     return a.createTime > b.createTime;
                 });
-                this.doneList.sort(function (a, b) {
-                    return a.createTime > b.createTime;
-                });
                 localStorage.setItem(this.lsKeyTodoList, JSON.stringify(this.todoList));
-                localStorage.setItem(this.lsKeyDoneList, JSON.stringify(this.doneList));
-                localStorage.setItem(this.lsKeyDeletedList, JSON.stringify(this.deletedList));
             },
             genOne: function () {
                 var now = new Date().getTime();
                 return {
-                    id: 't_' + now,
-                    content: '',
-                    desc: '',
-                    status: 0, // 状态: 0-默认, 1-已完成, 2-已删除
-                    createTime: now,
-                    updateTime: now
+                    id: 't_' + now, // id
+                    content: '', // 内容
+                    desc: '', // 描述
+                    finished: false, // 是否已完成
+                    deleted: false, // 是否已删除
+                    createTime: now, // 创建时间
+                    updateTime: now // 修改时间
                 };
             }
         }
